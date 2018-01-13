@@ -37,7 +37,7 @@ void setup()
   pinMode(13, OUTPUT);          // LED PIN
   pinMode(ECHO_PIN, INPUT);     // ECHO PIN
   pinMode(TRIG_PIN,OUTPUT);
-  Wire.begin(0x38);             // i2c in slave mode address is 0x38
+  Wire.begin(0x38);             // i2c in slave mode address is 0x38(in ppz should be 0x70)
   Wire.onRequest(requestEvent); // register event
   RMSF.SetWindowSize(24);
   
@@ -73,6 +73,6 @@ void requestEvent()
   sendbyte[0]=sendhi;
   sendbyte[1]=sendli;
   sendbyte[2]=(sendhi+sendli)&0xff;
-  Wire.write(sendbyte,2); 
+  Wire.write(sendbyte,3); 
   blinkled(); 
 }
