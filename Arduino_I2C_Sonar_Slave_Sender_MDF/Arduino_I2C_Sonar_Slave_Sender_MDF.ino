@@ -54,9 +54,9 @@ void loop()
   tempread = pulseIn(ECHO_PIN, HIGH, PULSE_TIMEOUT);
   MDF.PushMedian(tempread);
   reading_cm=MDF.GetMedian()/29.1/2;
- 
+
    Serial.println(reading_cm);
- 
+
 }
 
 
@@ -71,6 +71,6 @@ void requestEvent()
   sendbyte[0]=sendhi;
   sendbyte[1]=sendli;
   sendbyte[2]=(sendhi+sendli)&0xff;
-  Wire.write(sendbyte,3); 
-  blinkled(); 
+  Wire.write(sendbyte,3);
+  blinkled();
 }
