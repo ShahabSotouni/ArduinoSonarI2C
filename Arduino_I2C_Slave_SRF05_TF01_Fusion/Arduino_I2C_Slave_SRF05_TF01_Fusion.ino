@@ -23,7 +23,7 @@ MedianFilter MDF_TF01;
 MedianFilter MDF_Fused;
 
 uint16_t tempread_Sonar, reading_cm_Sonar,fused_reading_cm;
-unsigned int height_TF01;
+unsigned int height_TF01=0,height_TF01_lastval=0;
 bool ledflag = false;
 
 //Blink LED
@@ -58,7 +58,7 @@ void setup()
   pinMode(TRIG_PIN,OUTPUT);
   Wire.begin(0x38);             // i2c in slave mode address is 0x38(in ppz should be 0x70)
   Wire.onRequest(requestEvent); // register event
-  RMSF_Sonar.SetWindowSize(24);
+  RMSF_Sonar.SetWindowSize(12);
   MDF_TF01.SetWindowSize(9);
   MDF_Fused.SetWindowSize(9);
 }
@@ -71,17 +71,26 @@ void setup()
 
 void loop()
 {
-  readSRF05();
   readTF01();
-  if(reading_cm_Sonar>30 && height_TF01<50){
-    double int_gain=(((double)height_TF01-40.0)/20.0);
+
+
+  if(height_TF01>50){
+       fused_reading_cm=height_TF01;
+  }else {
+    readSRF05();
+    if(reading_cm_Sonar>30){
+  
+  
+    double int_gain=(((double)reading_cm_Sonar-30.0)/20.0);
+    
       fused_reading_cm=(1-int_gain)*(double)reading_cm_Sonar
                         +int_gain*(double)height_TF01;
-  }else if (reading_cm_Sonar<=30 && height_TF01<50 ){
+  }else{
       fused_reading_cm=reading_cm_Sonar;
-  }else {
-       fused_reading_cm=height_TF01;
+  } 
   }
+
+
 
 /*MDF_Fused.PushMedian(fused_reading_cm);
 fused_reading_cm=MDF_Fused.GetMedian();
@@ -131,6 +140,10 @@ void readTF01(){
 
              MDF_TF01.PushMedian(height_TF01);
              height_TF01=MDF_TF01.GetMedian();
+             if (height_TF01>300)
+                 height_TF01=height_TF01_lastval;
+             
+             height_TF01_lastval=height_TF01;
             //Serial.println(t2);
 
          }
@@ -143,7 +156,7 @@ void readTF01(){
 
 void readSRF05(){
   
-  
+  delay(53);
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
